@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# Raad Dashboard
 
-## Getting Started
+This Next.js app is deployed to Cloudflare Workers through the OpenNext Cloudflare adapter. The Cloudflare project root is `dashboard_test/`; the static website in the repository root is a separate project.
 
-First, run the development server:
+## Local commands
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Run `npm ci` to install the locked dependencies, `npm run dev` for local Next.js development, and `npm run preview` to build and preview the app in the Workers runtime.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Cloudflare Workers Builds
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Connect the GitHub repository in Cloudflare Workers Builds and configure:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Root directory: `dashboard_test`
+- Build command: `npx @opennextjs/cloudflare build`
+- Deploy command: `npx @opennextjs/cloudflare deploy`
+- Build environment: `NODE_VERSION=24`
+- Additional build variables: none
 
-## Learn More
+The OpenNext build command runs the `build` script (`next build`) and then generates the Cloudflare Worker output. The deploy command publishes that generated Worker. For a gradual deployment, use `npx @opennextjs/cloudflare upload` as the deploy command instead.
 
-To learn more about Next.js, take a look at the following resources:
+The matching local commands from this directory are `npm run preview` and `npm run deploy`. The Worker entry point and asset directory are configured in `wrangler.jsonc`. `WORKER_SELF_REFERENCE` points back to the same Worker. No R2 cache, image service, database, or other binding is currently needed by this starter.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment variables and secrets
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The application currently reads no environment variables and requires no secrets. Do not create production variables until an app feature needs them. Add any future server credentials as Worker secrets, never as `NEXT_PUBLIC_*` values.
 
-## Deploy on Vercel
+## Runtime notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The app currently has one static App Router page, no API routes, dynamic routes, middleware, authentication, or database. Local images are served without runtime image optimization. Geist is fetched by `next/font` during the build and embedded in the generated assets; builds therefore need npm registry access as well as network access for the font fetch.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The `robots.txt`, `sitemap.xml`, and `CNAME` in the repository root belong to the separate static site. Set a real production hostname before adding canonical URLs, Open Graph URL metadata, or a sitemap for this app.
